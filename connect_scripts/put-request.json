@@ -1,0 +1,13 @@
+{ "AgenttoAgent": [
+		{
+			"PutRequest": {
+				"Item": {
+					"Extension": {"S": "zzzz"},
+					"AgentLoginName": {"S": ""},
+					"InUse": {"BOOL": true}	
+					}
+				}
+		
+		}
+		]
+}
