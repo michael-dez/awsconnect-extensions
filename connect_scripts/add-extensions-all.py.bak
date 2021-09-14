@@ -1,0 +1,23 @@
+import boto3
+import json
+
+conClient = boto3.client('connect')
+users = dict()
+iid='794790f5-0ae2-4348-806a-f58bf245ab3f'
+
+response = conClient.list_users(
+InstanceId=iid,
+MaxResults=10
+)
+
+while "NextToken" in response:
+#    users.update(response.get('UserSummaryList'))
+
+    print(response.get('UserSummaryList'))
+    response = conClient.list_users(
+            NextToken=response["NextToken"],
+            InstanceId=iid,
+            MaxResults=10)
+
+print(type(users))
+print(users)
