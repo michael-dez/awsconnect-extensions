@@ -4,6 +4,8 @@ from boto3.dynamodb.conditions import Key,Attr
 # TODO:function to check if agent has an extension, function to assign extension, and check function for exception handling and readability
  
 # queries global secondary index for agent, if found returns true
+global unused = []
+
 def has_extension(username):
     u = username
     dbClient = boto3.resource('dynamodb')
@@ -18,21 +20,27 @@ def has_extension(username):
 
     else:
         return True 
+def get_unused_ext():
+
+    response = table.query(
+    IndexName='skIndex',
+    Limit=100,
+    KeyConditionExpression=Key('sk').eq("nu"))
+    
+    
+    unused = response.get('Items')
+
+    return unused
 
 def set_extension(username):
     u = username
     dbClient = boto3.resource('dynamodb')
     table = dbClient.Table('AgenttoAgent')
-    
-    response1 = table.scan(
-    #TODO:scan parameters for available extensions
-    )
-    availExt = response1.get('Items', {})
-    
-    print (availExt)
+
+    if not bool(unused):
+        get_unused_ext()
 
 
-    print(response1)
 def main():
 
     conClient = boto3.client('connect')
