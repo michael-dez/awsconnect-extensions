@@ -4,12 +4,14 @@ from boto3.dynamodb.conditions import Key,Attr
 
 # TODO:function to check if agent has an extension, function to assign extension, and check function for exception handling and readability
  
-dynamodb = boto3.resource('dynamodb', region_name = 'us-east-1') 
-table = dynamodb.Table('AgentData')
+dynamodb = boto3.client('dynamodb', region_name = 'us-east-1') 
+res_dynamodb = boto3.resource('dynamodb')
+table = res_dynamodb.Table('AgentData')
 
 connect = boto3.client('connect')
 
 global unused = []
+
 
 # checks if a user is currently assigned an extension 
 def has_extension(username):
@@ -25,6 +27,7 @@ def has_extension(username):
     else:
         return True 
         
+
 # gets list of connect users, returns as list
 def  get_users():
     users = []
@@ -47,6 +50,7 @@ def  get_users():
     users.append(response.get('UserSummaryList'))
     return users
 
+
 # gets unused extensions 100 at a time
 def get_unused_ext():
     global unused
@@ -58,8 +62,9 @@ def get_unused_ext():
     
     
     unused = response.get('Items')
-
     return 
+
+
 #TODO: finish
 def set_extension(username):
     u = username
@@ -67,6 +72,40 @@ def set_extension(username):
 
     if not bool(unused):
         get_unused_ext()
+
+    extension = unused.pop()
+# TODO: make transactional delete checking for any other items using same 'pk'
+    response = table.delete_item(
+        Key={
+            'pk': {'S': extension},
+            'sk': {'S': 'nu'}
+            }
+    )
+
+# add pk extension sk agentID
+    response = table.put_item(
+            Item={
+                'pk': extension,
+                'sk': agentID,
+                'sk_value': username
+            }
+    )
+
+# add pk extension sk 
+"""
+    response = client.transact_write_items(
+        TransactItems=[
+            {
+                'ConditionCheck': {
+                    'Key':{
+                        
+                    }
+                    
+                }
+            }
+        ]
+    )
+"""
 
 
 def main():
