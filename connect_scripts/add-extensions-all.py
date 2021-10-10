@@ -1,3 +1,4 @@
+import pdb
 import boto3
 import json
 from boto3.dynamodb.conditions import Key,Attr
@@ -10,16 +11,19 @@ table = res_dynamodb.Table('AgentData')
 
 connect = boto3.client('connect')
 
-global unused = []
+unused = []
+
 
 
 # checks if a user is currently assigned an extension 
+# checks if a user is currently assigned an extension
+#TODO: broken - key's sk should equal username and pk should equal agentID or such
 def has_extension(username):
     u = username
 
     response = table.query(
             IndexName='byAgent',
-            KeyConditionExpression=Key('AgentLoginName').eq(u))
+            KeyConditionExpression=Key('pk').eq(u))
     hasExt = response.get('Items', {})
 
     if (bool(hasExt)):
@@ -28,9 +32,11 @@ def has_extension(username):
         return True 
         
 
-# gets list of connect users, returns as list
+# gets list of connect users, returns as list of dicts
+# TODO: broken users var
 def  get_users():
-    users = []
+    users = {}
+    items = []
     iid ='794790f5-0ae2-4348-806a-f58bf245ab3f'
     response = connect.list_users(
     InstanceId=iid,
@@ -40,21 +46,24 @@ def  get_users():
     while "NextToken" in response:
         addUsers = response.get('UserSummaryList')
 
-        users.append(addUsers)
+        users.update(addUsers)
 
         response = connect.list_users(
                 NextToken=response["NextToken"],
                 InstanceId=iid,
                 MaxResults=10)
 
-    users.append(response.get('UserSummaryList'))
+    users.update(response.get('UserSummaryList'))
+    
+    breakpoint()
     return users
 
 
 # gets unused extensions 100 at a time
+# gets "not used (nu)" extensions 100 at a time
+#TODO: only return pk and sk as sk_value is the same as pk for these items
 def get_unused_ext():
     global unused
-
     response = table.query(
     IndexName='skIndex',
     Limit=100,
@@ -66,6 +75,15 @@ def get_unused_ext():
 
 
 #TODO: finish
+    items = response.get('Items') 
+
+    for _ in items:
+        unused.append(_.get('pk'))
+        
+    return 
+
+
+#TODO: test 
 def set_extension(username):
     u = username
     global unused
@@ -82,6 +100,10 @@ def set_extension(username):
             }
     )
 
+            'pk': extension,
+            'sk': 'nu'
+            }
+    )
 # add pk extension sk agentID
     response = table.put_item(
             Item={
@@ -107,10 +129,13 @@ def set_extension(username):
     )
 """
 
+                'sk': "agentID",
+                'sk_value': username
+            }
+    )
 
-def main():
+    return
 
-if __name__ == "__main__":
-    main()
-
-
+#get_unused_ext()
+get_users()
+breakpoint()
