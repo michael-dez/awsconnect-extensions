@@ -68,13 +68,7 @@ def get_unused_ext():
     IndexName='skIndex',
     Limit=100,
     KeyConditionExpression=Key('sk').eq("nu"))
-    
-    
-    unused = response.get('Items')
-    return 
 
-
-#TODO: finish
     items = response.get('Items') 
 
     for _ in items:
@@ -95,11 +89,6 @@ def set_extension(username):
 # TODO: make transactional delete checking for any other items using same 'pk'
     response = table.delete_item(
         Key={
-            'pk': {'S': extension},
-            'sk': {'S': 'nu'}
-            }
-    )
-
             'pk': extension,
             'sk': 'nu'
             }
@@ -108,31 +97,11 @@ def set_extension(username):
     response = table.put_item(
             Item={
                 'pk': extension,
-                'sk': agentID,
+                'sk': 'agentID',
                 'sk_value': username
             }
     )
 
-# add pk extension sk 
-"""
-    response = client.transact_write_items(
-        TransactItems=[
-            {
-                'ConditionCheck': {
-                    'Key':{
-                        
-                    }
-                    
-                }
-            }
-        ]
-    )
-"""
-
-                'sk': "agentID",
-                'sk_value': username
-            }
-    )
 
     return
 
