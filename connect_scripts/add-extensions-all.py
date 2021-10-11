@@ -1,4 +1,3 @@
-import pdb
 import boto3
 import json
 from boto3.dynamodb.conditions import Key,Attr
@@ -14,16 +13,14 @@ connect = boto3.client('connect')
 unused = []
 
 
-
-# checks if a user is currently assigned an extension 
 # checks if a user is currently assigned an extension
-#TODO: broken - key's sk should equal username and pk should equal agentID or such
+#TODO: test 
 def has_extension(username):
     u = username
 
     response = table.query(
             IndexName='byAgent',
-            KeyConditionExpression=Key('pk').eq(u))
+            KeyConditionExpression=Key('sk').eq('agentID') & Key('sk_value').eq(u))
     hasExt = response.get('Items', {})
 
     if (bool(hasExt)):
@@ -33,10 +30,9 @@ def has_extension(username):
         
 
 # gets list of connect users, returns as list of dicts
-# TODO: broken users var
+# TODO: test
 def  get_users():
-    users = {}
-    items = []
+    users =[] 
     iid ='794790f5-0ae2-4348-806a-f58bf245ab3f'
     response = connect.list_users(
     InstanceId=iid,
@@ -46,20 +42,19 @@ def  get_users():
     while "NextToken" in response:
         addUsers = response.get('UserSummaryList')
 
-        users.update(addUsers)
+        users.append(addUsers)
 
         response = connect.list_users(
                 NextToken=response["NextToken"],
                 InstanceId=iid,
                 MaxResults=10)
 
-    users.update(response.get('UserSummaryList'))
+    users.append(response.get('UserSummaryList'))
     
     breakpoint()
     return users
 
 
-# gets unused extensions 100 at a time
 # gets "not used (nu)" extensions 100 at a time
 #TODO: only return pk and sk as sk_value is the same as pk for these items
 def get_unused_ext():
