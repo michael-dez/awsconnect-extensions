@@ -2,7 +2,7 @@ import boto3
 import json
 from boto3.dynamodb.conditions import Key,Attr
 
-# TODO:function to check if agent has an extension, function to assign extension, and check function for exception handling and readability
+# TODO: function to remove user, exception handling, event handler for lambda
  
 dynamodb = boto3.client('dynamodb', region_name = 'us-east-1') 
 res_dynamodb = boto3.resource('dynamodb')
@@ -56,7 +56,7 @@ def  get_users():
 
 
 # gets "not used (nu)" extensions 100 at a time
-#TODO: only return pk and sk as sk_value is the same as pk for these items
+#TODO: add while loop for when unused is <100 to repeat query. Only return pk and sk as sk_value is the same as pk for these items
 def get_unused_ext():
     global unused
     response = table.query(
@@ -72,7 +72,6 @@ def get_unused_ext():
     return 
 
 
-#TODO: test 
 def set_extension(username):
     u = username
     global unused
@@ -97,9 +96,9 @@ def set_extension(username):
             }
     )
 
-
+    breakpoint()
     return
 
 #get_unused_ext()
-get_users()
+set_extension("mmendez")
 breakpoint()
