@@ -74,12 +74,13 @@ def get_unused_ext():
         
     return 
 
-# TODO: return exception if user is already assigned an extension
 def set_extension(username):
     u = username
     global unused
 
     if has_extension(username):
+        print(username + " already has extension")#debug
+        breakpoint()#debug
         return
     if not bool(unused):
         get_unused_ext()
@@ -100,17 +101,21 @@ def set_extension(username):
                 'sk_value': username
             }
     )
+    print(username + " added")#debug
+    breakpoint()#debug
 
     return
 
 def update_db():
     users = get_users() 
-    for _ in users
+    for _ in users:
         set_extension(_)
     return
 
 
+# TODO: define return value
 def lambda_handler(event, context):
     response = update_db()
     return response
 
+update_db()
