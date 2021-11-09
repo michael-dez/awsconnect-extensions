@@ -30,6 +30,20 @@ def has_extension(username):
         return False 
         
 
+#TODO: paginate/iterate next tokens
+def get_db_users():
+
+    response = table.query(
+    IndexName='skIndex',
+    KeyConditionExpression=Key('sk').eq("agentID"))
+
+    db_users = response.get('Items') 
+    return db_users
+
+    #for _ in items:
+        #db_users.append(_.get(''))
+    
+
 # gets list of connect users, returns as list of dicts
 def  get_users():
     users =[] 
@@ -52,7 +66,6 @@ def  get_users():
 
     for _ in response.get('UserSummaryList'):
         users.append(_.get('Username'))
-    breakpoint()
     
     return users
 
@@ -80,7 +93,6 @@ def set_extension(username):
 
     if has_extension(username):
         print(username + " already has extension")#debug
-        breakpoint()#debug
         return
     if not bool(unused):
         get_unused_ext()
@@ -102,9 +114,9 @@ def set_extension(username):
             }
     )
     print(username + " added")#debug
-    breakpoint()#debug
 
     return
+
 
 def update_db():
     users = get_users() 
@@ -118,4 +130,5 @@ def lambda_handler(event, context):
     response = update_db()
     return response
 
-update_db()
+users_old = get_db_users()
+breakpoint()
