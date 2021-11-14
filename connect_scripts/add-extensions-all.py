@@ -75,7 +75,7 @@ def get_db_users():
 def get_users():
     users = set() 
     response = connect.list_users(
-    InstanceId=iid,
+    InstanceId=connect_iid,
     MaxResults=10
     )
 
