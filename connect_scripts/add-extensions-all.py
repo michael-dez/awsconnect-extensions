@@ -22,6 +22,23 @@ unused = []
 db_users = {}
 
 
+# initializes table with all available extensions
+def initialize_table():
+    with table.batch_writer() as writer:
+        for x in range(10000):
+            extension = str(x)
+            extension = extension.zfill(4)
+
+            newItem = {
+            "pk": extension,
+            "sk": "nu",
+            "sk_value": extension
+            }
+
+            response = writer.put_item(Item=newItem)
+    return
+
+
 # get dictionary from item list
 def items_to_dict(items):
     d = {}
@@ -94,7 +111,7 @@ def has_extension(username):
 
 
 # remove user by extension
-#TODO: test, should accept a list of users for batch operations; make conditional 
+#TODO: test, should accept a list of users for batch operations; make conditional if possible
 def remove_user(pk):
     response = table.delete_item(            
         Key={
@@ -163,6 +180,9 @@ def set_extension(username):
 
 def update_db():
     users = get_users() 
+    get_unused_ext()
+    if not unused:
+        initialize_table()
 
     for _ in users:
         set_extension(_)
