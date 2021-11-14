@@ -4,36 +4,25 @@ import os
 import logging
 from boto3.dynamodb.conditions import Key,Attr
 
-# TODO: convert has_extension function to utilize 1 user query from get_db_users
-# , backoff algorithm for connect api request in get_user (?), logging
- 
+region = os.environ.get('AWS_REGION')
+connect_iid = os.environ.get('AWS_CONNECT_INSTANCEID')
+table_name = os.environ.get('AWS_CONNECT_TABLE')
+# logger, env check, aws resources 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-dynamodb = boto3.client('dynamodb', region_name = 'us-east-1') 
+if not region: logger.warning("Missing AWS_REGION Environmental Variable!")
+if not connect_iid: logger.warning("Missing AWS_CONNECT_INSTANCEID Environmental Variable!")
+if not table_name: logger.warning("Missing AWS_CONNECT_TABLE Environmental Variable!")
+dynamodb = boto3.client('dynamodb', region_name = region) 
 res_dynamodb = boto3.resource('dynamodb')
-table = res_dynamodb.Table('AgentData')
-
+table = res_dynamodb.Table(table_name)
 connect = boto3.client('connect')
-
+# global vars
 unused = []
 db_users = {}
 
 
-# checks if a user is currently assigned an extension
-def has_extension(username):
-    u = username
-
-    response = table.query(
-            IndexName='skIndex',
-            KeyConditionExpression=Key('sk').eq('agentID') & Key('sk_value').eq(u))
-    hasExt = response.get('Items', {})
-    if (bool(hasExt)): # checks if the stored query result (hasExt) does not contain an item, in which case it returns false
-        return True 
-    else:
-        return False 
-
-
-# add response items to a dict (returned)
+# get dictionary from item list
 def items_to_dict(items):
     d = {}
     for _ in items:
@@ -69,7 +58,6 @@ def get_db_users():
 # gets list of connect users, returns as set of usernames
 def get_users():
     users = set() 
-    iid ='794790f5-0ae2-4348-806a-f58bf245ab3f'
     response = connect.list_users(
     InstanceId=iid,
     MaxResults=10
@@ -83,13 +71,26 @@ def get_users():
 
         response = connect.list_users(
                 NextToken=response["NextToken"],
-                InstanceId=iid,
+                InstanceId=connect_iid,
                 MaxResults=10)
 
     for _ in response.get('UserSummaryList'):
         users.add(_.get('Username'))
     
     return users
+
+
+# checks if a user is currently assigned an extension
+def has_extension(username):
+    u = username
+    if db_users == {}:
+        get_db_users()
+
+    hasExt = db_users.get(u)
+    if (bool(hasExt)): # checks if the stored query result (hasExt) does not contain a value 
+        return True 
+    else:
+        return False 
 
 
 # remove user by extension
@@ -112,7 +113,6 @@ def remove_user(pk):
     return
 
 # gets "not used (nu)" extensions 100 at a time
-# TODO: raise exception when unable to find nu items
 def get_unused_ext():
     global unused
 
@@ -156,7 +156,7 @@ def set_extension(username):
                 'sk_value': username
             }
     )
-    logger.info(username + ": added")#debug
+    logger.info(username + ": added")
 
     return
 
@@ -173,12 +173,12 @@ def update_db():
         for _ in db_users:
             if _ not in users:
                 remove_user(db_users[_])
-                logger.info(_ + "[" + db_users[_] + "]: removed")#debug
+                logger.info(_ + "[" + db_users[_] + "]: removed")
 
     return
 
 
-# TODO: define return value
+# TODO: a return value would be nice 
 def lambda_handler(event, context):
     update_db()
     return
