@@ -47,7 +47,6 @@ def items_to_dict(items):
     return d
 
 
-#TODO: test with query that produces Last Evaluated Key 
 def get_db_users():
     global db_users
     response = table.query(
@@ -111,7 +110,6 @@ def has_extension(username):
 
 
 # remove user by extension
-#TODO: test, should accept a list of users for batch operations; make conditional if possible
 def remove_user(pk):
     response = table.delete_item(            
         Key={
@@ -158,7 +156,6 @@ def set_extension(username):
         get_unused_ext()
 
     extension = unused.pop()
-# TODO: make conditional delete to verify that 'nu' item still exists
     response = table.delete_item(
         Key={
             'pk': extension,
@@ -198,7 +195,9 @@ def update_db():
     return
 
 
-# TODO: a return value would be nice 
 def lambda_handler(event, context):
     update_db()
-    return
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Ok!')
+    }
