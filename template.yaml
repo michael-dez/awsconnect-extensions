@@ -10,7 +10,7 @@ Resources:
   UpdateAgentDb:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: TODO
+      CodeUri: 
       Description: Lambda to update agent extension database for Amazon Connect
       Environment: 
         Variables: 
