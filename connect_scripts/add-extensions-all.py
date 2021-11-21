@@ -2,20 +2,26 @@ import boto3
 import json
 import os
 import logging
+import csv
 from boto3.dynamodb.conditions import Key,Attr
 
-region = os.environ.get('AWS_REGION')
-connect_iid = os.environ.get('AWS_CONNECT_INSTANCEID')
-table_name = os.environ.get('AWS_CONNECT_TABLE')
+# constants/env vars
+REGION = os.environ.get('AWS_REGION')
+CONNECT_IID = os.environ.get('AWS_CONNECT_INSTANCEID')
+TABLE_NAME = os.environ.get('AWS_CONNECT_TABLE')
+BUCKET_NAME = os.environ.get('AWS_EXPORT_BUCKET')
 # logger, env check, aws resources 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-if not region: logger.warning("Missing AWS_REGION Environmental Variable!")
-if not connect_iid: logger.warning("Missing AWS_CONNECT_INSTANCEID Environmental Variable!")
-if not table_name: logger.warning("Missing AWS_CONNECT_TABLE Environmental Variable!")
-dynamodb = boto3.client('dynamodb', region_name = region) 
+# TODO refactor as for loop
+if not REGION: logger.warning("Missing AWS_REGION Environmental Variable!")
+if not CONNECT_IID: logger.warning("Missing AWS_CONNECT_INSTANCEID Environmental Variable!")
+if not TABLE_NAME: logger.warning("Missing AWS_CONNECT_TABLE Environmental Variable!")
+if not BUCKET_NAME: logger.warning("Missing AWS_EXPORT_BUCKET Environmental Variable!")
+
+dynamodb = boto3.client('dynamodb', region_name = REGION) 
 res_dynamodb = boto3.resource('dynamodb')
-table = res_dynamodb.Table(table_name)
+table = res_dynamodb.Table(TABLE_NAME)
 connect = boto3.client('connect')
 # global vars
 unused = []
@@ -75,7 +81,7 @@ def get_db_users():
 def get_users():
     users = set() 
     response = connect.list_users(
-    InstanceId=connect_iid,
+    InstanceId=CONNECT_IID,
     MaxResults=10
     )
 
@@ -87,7 +93,7 @@ def get_users():
 
         response = connect.list_users(
                 NextToken=response["NextToken"],
-                InstanceId=connect_iid,
+                InstanceId=CONNECT_IID,
                 MaxResults=10)
 
     for _ in response.get('UserSummaryList'):
@@ -175,10 +181,28 @@ def set_extension(username):
     return
 
 
+def export_s3():
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(BUCKET_NAME)
+
+    with open('/tmp/temp.csv', 'w', newline='') as data:
+        fieldnames = ['user','extension']
+        header = True
+        writer = csv.writer(data)
+        writer.writerow(fieldnames)
+        
+        for _ in db_users:
+            writer.writerow([_ , db_users[_]]) 
+
+    bucket.upload_file('/tmp/temp.csv', 'agent_extensions.csv')
+
+    return
+
+
 def update_db():
     users = get_users() 
     get_unused_ext()
-    if not unused:
+    if not unused and users:
         initialize_table()
 
     for _ in users:
@@ -191,6 +215,10 @@ def update_db():
             if _ not in users:
                 remove_user(db_users[_])
                 logger.info(_ + "[" + db_users[_] + "]: removed")
+                db_users.pop(_)
+
+    if BUCKET_NAME: 
+        export_s3()
 
     return
 
