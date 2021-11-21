@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Globals:
+Description: SAM deployment of agent extension system for Amazon Connect
+Metadata:
+Parameters:
+Mappings:
+Conditions:
+Resources:
+  UpdateAgentDb:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Architectures: List
+      AssumeRolePolicyDocument: JSON
+      AutoPublishAlias: String
+      AutoPublishCodeSha256: String
+      CodeSigningConfigArn: String
+      CodeUri: String | FunctionCode
+      DeadLetterQueue: Map | DeadLetterQueue
+      DeploymentPreference: DeploymentPreference
+      Description: String
+      Environment: Environment
+      EventInvokeConfig: EventInvokeConfiguration
+      Events: EventSource
+      FileSystemConfigs: List
+      FunctionName: String
+      Handler: String
+      ImageConfig: ImageConfig
+      ImageUri: String
+      InlineCode: String
+      KmsKeyArn: String
+      Layers: List
+      MemorySize: Integer
+      PackageType: String
+      PermissionsBoundary: String
+      Policies: String | List | Map
+      ProvisionedConcurrencyConfig: ProvisionedConcurrencyConfig
+      ReservedConcurrentExecutions: Integer
+      Role: String
+      Runtime: String
+      Tags: Map
+      Timeout: Integer
+      Tracing: String
+      VersionDescription: String
+      VpcConfig: VpcConfig
+
+  AgentData:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+        - AttributeName: sk_value
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes:
+        - IndexName: skIndex
+          KeySchema:
+            - AttributeName: sk
+              KeyType: HASH
+            - AttributeName: sk_value
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      TableName: AgentData
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: a24f3584-5bf7-41f9-80eb-9bc4aa4a7c50
+Outputs:
