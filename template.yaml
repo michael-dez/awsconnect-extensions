@@ -4,19 +4,27 @@ Globals:
 Description: SAM deployment of agent extension system for Amazon Connect
 Metadata:
 Parameters:
+  ConnectParam:
+    Description: Enter the ARN of the Amazon Connect Instance.
+    Type: String
+  BucketParam:
+    Description: (optional) Enter the name of the bucket for csv export.
+    Type: String
 Mappings:
 Conditions:
 Resources:
-  UpdateAgentDb:
+  UpdateAgentDbLamda:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: 
+      CodeUri: awsconnect-extensions/
       Description: Lambda to update agent extension database for Amazon Connect
       Environment: 
         Variables: 
-          CONNECT_IID : TODO 
-          TABLE_NAME : TODO
-          BUCKET_NAME  : TODO
+          CONNECT_IID :  
+            Ref: ConnectParam
+          TABLE_NAME: AgentData
+          BUCKET_NAME:
+            Ref: BucketParam
       Events:
         AgentDBSchedule:
           Type: Schedule
@@ -27,22 +35,35 @@ Resources:
             Enabled: true
       FunctionName: UpdateAgentDb
       Handler: update_db.lambda_handler
-      ImageUri: String
-      InlineCode: String
-      KmsKeyArn: String
-      Layers: List
-      MemorySize: Integer
-      PermissionsBoundary: String
-      Policies: String | List | Map
-      ProvisionedConcurrencyConfig: ProvisionedConcurrencyConfig
-      ReservedConcurrentExecutions: Integer
-      Role: String
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:
+          TableName: AgentData
+        - S3WritePolicy:
+          TableName:
+            Ref: BucketParam
+        - Statement:
+          - Sid: ConnectListUsers
+          Effect: Allow
+          Action:
+            - connect:ListUsers
+          Resource:
+            Ref: ConnectParam
       Runtime: python3.9
-      Timeout: Integer
-      Tracing: String
-      VersionDescription: String
-      VpcConfig: VpcConfig
-
+      Timeout: 600
+  GetAgentLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: awsconnect-extensions/
+      Description: Lambda to update agent extension database for Amazon Connect
+      FunctionName: GetAgent
+      Handler: getAgent.lambda_handler
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:
+          TableName: AgentData
+      Runtime: python3.9
+      Timeout: 5
   AgentData:
     Type: 'AWS::DynamoDB::Table'
     Properties:
@@ -69,7 +90,3 @@ Resources:
         - AttributeName: sk
           KeyType: RANGE
       TableName: AgentData
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: a24f3584-5bf7-41f9-80eb-9bc4aa4a7c50
-Outputs:
