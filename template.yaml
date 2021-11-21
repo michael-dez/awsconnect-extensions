@@ -10,21 +10,23 @@ Resources:
   UpdateAgentDb:
     Type: 'AWS::Serverless::Function'
     Properties:
-      AssumeRolePolicyDocument: JSON
-      AutoPublishAlias: String
-      AutoPublishCodeSha256: String
-      CodeSigningConfigArn: String
-      CodeUri: String | FunctionCode
-      DeadLetterQueue: Map | DeadLetterQueue
-      DeploymentPreference: DeploymentPreference
+      CodeUri: TODO
       Description: Lambda to update agent extension database for Amazon Connect
-      Environment: Environment
-      EventInvokeConfig: EventInvokeConfiguration
-      Events: EventSource
-      FileSystemConfigs: List
+      Environment: 
+        Variables: 
+          CONNECT_IID : TODO 
+          TABLE_NAME : TODO
+          BUCKET_NAME  : TODO
+      Events:
+        AgentDBSchedule:
+          Type: Schedule
+          Properties: 
+            Schedule: 'rate(1 hour)'
+            Name: AgentDBSchedule
+            Description: Updates Agent Database
+            Enabled: true
       FunctionName: UpdateAgentDb
-      Handler: String
-      ImageConfig: ImageConfig
+      Handler: update_db.lambda_handler
       ImageUri: String
       InlineCode: String
       KmsKeyArn: String
