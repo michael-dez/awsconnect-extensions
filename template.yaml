@@ -8,9 +8,8 @@ Parameters:
     Description: Enter the ARN of the Amazon Connect Instance.
     Type: String
   BucketParam:
-    Description: (optional) Enter the name of the bucket for csv export.
+    Description: Enter the name of the bucket for csv export.
     Type: String
-Mappings:
 Conditions:
 Resources:
   UpdateAgentDbLamda:
