@@ -13,80 +13,81 @@ Parameters:
     Type: String
 Resources:
   UpdateAgentDbLambda:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: awsconnect-extensions/
+      CodeUri: UpdateAgentDbLambda
       Description: Lambda to update agent extension database for Amazon Connect
-      Environment: 
-        Variables: 
-          AWS_CONNECT_INSTANCEID :  
+      Environment:
+        Variables:
+          AWS_CONNECT_INSTANCEID:
             Ref: ConnectParam
-          AWS_TABLE: 
+          AWS_TABLE:
             Ref: TableParam
-          AWS_EXPORT_BUCKET:
+          BUCKET_NAME:
             Ref: BucketParam
       Events:
         AgentDBSchedule:
           Type: Schedule
-          Properties: 
-            Schedule: 'rate(1 hour)'
+          Properties:
+            Schedule: rate(1 hour)
             Name: AgentDBSchedule
             Description: Updates Agent Database
             Enabled: true
       FunctionName: UpdateAgentDb
       Handler: update_db.lambda_handler
       Policies:
-        - AWSLambdaBasicExecutionRole
-        - DynamoDBCrudPolicy:
-            TableName: 
-                Ref: TableParam
-        - S3WritePolicy:
-            BucketName:
-              Ref: BucketParam
-        - Statement:
-          - Effect: Allow
-            Action: connect:ListUsers
-            Resource: !Ref ConnectParam
+      - AWSLambdaBasicExecutionRole
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: TableParam
+      - S3WritePolicy:
+          BucketName:
+            Ref: BucketParam
+      - Statement:
+        - Effect: Allow
+          Action: connect:ListUsers
+          Resource:
+            Ref: ConnectParam
       Runtime: python3.9
       Timeout: 600
   GetAgentLambda:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: awsconnect-extensions/
+      CodeUri: GetAgentLambda
       Description: Lambda to update agent extension database for Amazon Connect
       FunctionName: GetAgent
       Handler: getAgent.lambda_handler
       Policies:
-        - AWSLambdaBasicExecutionRole
-        - DynamoDBCrudPolicy:
-            TableName:
-                Ref: TableParam
+      - AWSLambdaBasicExecutionRole
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: TableParam
       Runtime: python3.9
       Timeout: 5
   AgentData:
-    Type: 'AWS::DynamoDB::Table'
+    Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: pk
-          AttributeType: S
-        - AttributeName: sk
-          AttributeType: S
-        - AttributeName: sk_value
-          AttributeType: S
+      - AttributeName: pk
+        AttributeType: S
+      - AttributeName: sk
+        AttributeType: S
+      - AttributeName: sk_value
+        AttributeType: S
       BillingMode: PAY_PER_REQUEST
       GlobalSecondaryIndexes:
-        - IndexName: skIndex
-          KeySchema:
-            - AttributeName: sk
-              KeyType: HASH
-            - AttributeName: sk_value
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-      KeySchema:
-        - AttributeName: pk
-          KeyType: HASH
+      - IndexName: skIndex
+        KeySchema:
         - AttributeName: sk
+          KeyType: HASH
+        - AttributeName: sk_value
           KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+      KeySchema:
+      - AttributeName: pk
+        KeyType: HASH
+      - AttributeName: sk
+        KeyType: RANGE
       TableName:
         Ref: TableParam
