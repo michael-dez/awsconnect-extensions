@@ -1,13 +1,15 @@
 import json
 import boto3
+import os
 from boto3.dynamodb.conditions import Key
 
+TABLE_NAME=os.environ.get('AWS_TABLE')
 
 def get_agent_id(Extension, dynamodb=None):
     if not dynamodb:
         dynamodb = boto3.resource('dynamodb')
 
-    table = dynamodb.Table('AgentData')
+    table = dynamodb.Table(TABLE_NAME)
     response = table.query(
         KeyConditionExpression=Key('pk').eq(str(Extension)) & Key('sk').eq('agentID')
     )
