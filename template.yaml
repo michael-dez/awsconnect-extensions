@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: SAM deployment of agent extension system for Amazon Connect
+Metadata:
+  Name: awsconnect-extensions
+  Description: Allows dialing Amazon Connect agents by extension
+  Author: Michael Mendez
+  HomePageUrl: https://github.com/michael-dez/awsconnect-extensions
 Parameters:
   ConnectParam:
     Description: Enter the ARN of the Amazon Connect Instance.
@@ -15,7 +20,7 @@ Resources:
   UpdateAgentDbLambda:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: awsconnect-extensions/
+      CodeUri: awsconnect-extensions/UpdateDb
       Description: Lambda to update agent extension database for Amazon Connect
       Environment: 
         Variables: 
@@ -52,8 +57,12 @@ Resources:
   GetAgentLambda:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: awsconnect-extensions/
+      CodeUri: awsconnect-extensions/GetAgent
       Description: Lambda to update agent extension database for Amazon Connect
+      Environment: 
+        Variables: 
+          AWS_TABLE: 
+            Ref: TableParam
       FunctionName: GetAgent
       Handler: getAgent.lambda_handler
       Policies:

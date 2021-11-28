@@ -28,8 +28,8 @@ unused = []
 db_users = {}
 
 
-# initializes table with all available extensions
 def initialize_table():
+    '''Initializes table with all available extensions.'''
     with table.batch_writer() as writer:
         for x in range(10000):
             extension = str(x)
@@ -45,8 +45,8 @@ def initialize_table():
     return
 
 
-# get dictionary from item list
 def items_to_dict(items):
+    '''Get dictionary from item list.'''
     d = {}
     for _ in items:
         d.update({_.get('sk_value'): _.get('pk')})
@@ -54,6 +54,7 @@ def items_to_dict(items):
 
 
 def get_db_users():
+    '''Query table for all extensions in use by agents and store as global dictionary db_users'''
     global db_users
     response = table.query(
     IndexName='skIndex',
@@ -77,8 +78,8 @@ def get_db_users():
     return db_users
 
 
-# gets list of connect users, returns as set of usernames
 def get_users():
+    '''Gets list of connect users, returns as set of usernames.'''
     users = set() 
     response = connect.list_users(
     InstanceId=CONNECT_IID,
@@ -102,8 +103,8 @@ def get_users():
     return users
 
 
-# checks if a user is currently assigned an extension
 def has_extension(username):
+    '''Checks if a user is currently assigned an extension'''
     u = username
     if db_users == {}:
         get_db_users()
@@ -115,8 +116,8 @@ def has_extension(username):
         return False 
 
 
-# remove user by extension
 def remove_user(pk):
+    '''Remove user by extension.'''
     response = table.delete_item(            
         Key={
             'pk': pk,
@@ -133,8 +134,8 @@ def remove_user(pk):
 
     return
 
-# gets "not used (nu)" extensions 100 at a time
 def get_unused_ext():
+    '''Gets "not used (nu)" extensions 100 at a time.'''
     global unused
 
     response = table.query(
@@ -153,6 +154,7 @@ def get_unused_ext():
     return 
 
 def set_extension(username):
+    '''Allocate an extension for a single Connect user by passing their login name as a parameter.'''
     u = username
     global unused
 
@@ -182,6 +184,7 @@ def set_extension(username):
 
 
 def export_s3():
+    '''Export a csv file of updated agents/extensions to S3 bucket specified by the BUCKET_NAME environment variable.'''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(BUCKET_NAME)
 
@@ -200,6 +203,7 @@ def export_s3():
 
 
 def update_db():
+    '''Helper function to make lambda_handler as small as possible.'''
     users = get_users() 
     get_unused_ext()
     if not unused and users:
@@ -224,6 +228,7 @@ def update_db():
 
 
 def lambda_handler(event, context):
+    '''The lambda_handler function doesn't curretly utilize the event or context parameters.'''
     update_db()
     return {
         'statusCode': 200,
