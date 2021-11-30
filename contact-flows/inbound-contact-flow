@@ -1,0 +1,219 @@
+{
+    "modules": [
+        {
+            "id": "59c89c33-28cb-433b-818f-a3339ac8381a",
+            "type": "Transfer",
+            "branches": [
+                {
+                    "condition": "AtCapacity",
+                    "transition": "61dc6ffa-f3f1-4a35-b366-cae704d53160"
+                },
+                {
+                    "condition": "Error",
+                    "transition": "61dc6ffa-f3f1-4a35-b366-cae704d53160"
+                }
+            ],
+            "parameters": [],
+            "metadata": {
+                "position": {
+                    "x": 1489,
+                    "y": 30
+                },
+                "useDynamic": false,
+                "queue": null
+            },
+            "target": "Queue"
+        },
+        {
+            "id": "b790ce7b-7975-4cc3-8968-bb3409e1da87",
+            "type": "SetEventHook",
+            "branches": [
+                {
+                    "condition": "Success",
+                    "transition": "59c89c33-28cb-433b-818f-a3339ac8381a"
+                },
+                {
+                    "condition": "Error",
+                    "transition": "61dc6ffa-f3f1-4a35-b366-cae704d53160"
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "Type",
+                    "value": "CustomerQueue"
+                },
+                {
+                    "name": "ContactFlowId",
+                    "value": "Change to ARN of your Connect Instance.",
+                    "resourceName": "inbound-contact-flow"
+                }
+            ],
+            "metadata": {
+                "position": {
+                    "x": 1172,
+                    "y": 16
+                },
+                "contactFlow": {
+                    "id": "Change to ARN of your Conect instance",
+                    "text": "inbound awsconnect-extensions"
+                },
+                "customerOrAgent": true,
+                "useDynamic": false
+            }
+        },
+        {
+            "id": "98ec60e1-7795-40ca-9418-508b8b360d05",
+            "type": "SetQueue",
+            "branches": [
+                {
+                    "condition": "Success",
+                    "transition": "b790ce7b-7975-4cc3-8968-bb3409e1da87"
+                },
+                {
+                    "condition": "Error",
+                    "transition": "61dc6ffa-f3f1-4a35-b366-cae704d53160"
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "Agent",
+                    "value": "sk_value",
+                    "namespace": "External",
+                    "resourceName": null
+                }
+            ],
+            "metadata": {
+                "position": {
+                    "x": 862,
+                    "y": 34
+                },
+                "useDynamic": true,
+                "queue": "sk_value"
+            }
+        },
+        {
+            "id": "61dc6ffa-f3f1-4a35-b366-cae704d53160",
+            "type": "Disconnect",
+            "branches": [],
+            "parameters": [],
+            "metadata": {
+                "position": {
+                    "x": 1807,
+                    "y": 39
+                }
+            }
+        },
+        {
+            "id": "1a8ea348-cf8e-41e4-8d03-c57a02106fbc",
+            "type": "StoreUserInput",
+            "branches": [
+                {
+                    "condition": "Success",
+                    "transition": "fde95167-0f04-4770-a8c6-c42ed60fccac"
+                },
+                {
+                    "condition": "Error",
+                    "transition": "61dc6ffa-f3f1-4a35-b366-cae704d53160"
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "Text",
+                    "value": "Please enter the agent's extension number to continue.",
+                    "namespace": null
+                },
+                {
+                    "name": "TextToSpeechType",
+                    "value": "text"
+                },
+                {
+                    "name": "CustomerInputType",
+                    "value": "Custom"
+                },
+                {
+                    "name": "Timeout",
+                    "value": "5"
+                },
+                {
+                    "name": "MaxDigits",
+                    "value": 4
+                },
+                {
+                    "name": "EncryptEntry",
+                    "value": false
+                },
+                {
+                    "name": "DisableCancel",
+                    "value": false
+                }
+            ],
+            "metadata": {
+                "position": {
+                    "x": 243,
+                    "y": 23
+                },
+                "useDynamic": false,
+                "useDynamicForEncryptionKeys": true,
+                "useDynamicForTerminatorDigits": false,
+                "countryCodePrefix": "+1"
+            }
+        },
+        {
+            "id": "fde95167-0f04-4770-a8c6-c42ed60fccac",
+            "type": "InvokeExternalResource",
+            "branches": [
+                {
+                    "condition": "Success",
+                    "transition": "98ec60e1-7795-40ca-9418-508b8b360d05"
+                },
+                {
+                    "condition": "Error",
+                    "transition": "61dc6ffa-f3f1-4a35-b366-cae704d53160"
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "FunctionArn",
+                    "value": "Change to ARN of your Conect instance",
+                    "namespace": null
+                },
+                {
+                    "name": "TimeLimit",
+                    "value": "3"
+                },
+                {
+                    "name": "Parameter",
+                    "key": "pk",
+                    "value": "Stored customer input",
+                    "namespace": "System"
+                }
+            ],
+            "metadata": {
+                "position": {
+                    "x": 533,
+                    "y": 31
+                },
+                "dynamicMetadata": {
+                    "pk": true
+                },
+                "useDynamic": false
+            },
+            "target": "Lambda"
+        }
+    ],
+    "version": "1",
+    "start": "1a8ea348-cf8e-41e4-8d03-c57a02106fbc",
+    "metadata": {
+        "entryPointPosition": {
+            "x": 15,
+            "y": 20
+        },
+        "snapToGrid": false,
+        "name": "AgentToAgent",
+        "description": null,
+        "type": "contactFlow",
+        "status": "published",
+        "hash": "141ca291d8390d3dfecd08ea980299ac0a0db79f8eff24e28f5d9666ae51313a"
+    },
+    "type": "contactFlow"
+}

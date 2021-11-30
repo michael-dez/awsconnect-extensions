@@ -1,0 +1,143 @@
+{
+    "modules": [
+        {
+            "id": "f4563602-3842-4390-b522-b9889f6a5b7a",
+            "type": "Disconnect",
+            "branches": [],
+            "parameters": [],
+            "metadata": {
+                "position": {
+                    "x": 995,
+                    "y": 299
+                }
+            }
+        },
+        {
+            "id": "0a183497-fcb5-49bf-8bf2-37dac8372229",
+            "type": "LoopPrompts",
+            "branches": [
+                {
+                    "condition": "Error",
+                    "transition": "f4563602-3842-4390-b522-b9889f6a5b7a"
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "Text",
+                    "value": "Now transferring you to the agent.",
+                    "key": "text"
+                },
+                {
+                    "name": "AudioPrompt",
+                    "value": "arn:aws:connect:us-east-1:828393986024:instance/794790f5-0ae2-4348-806a-f58bf245ab3f/prompt/0ad26dbe-480f-4448-a569-b7d9d269f94e",
+                    "resourceName": "Music_Jazz_MyTimetoFly_Inst.wav"
+                }
+            ],
+            "metadata": {
+                "position": {
+                    "x": 627,
+                    "y": 37
+                },
+                "audio": [
+                    {
+                        "tts": "Now transferring you to the agent.",
+                        "useTts": true,
+                        "ttsType": "text",
+                        "type": "Text"
+                    },
+                    {
+                        "id": "arn:aws:connect:us-east-1:828393986024:instance/794790f5-0ae2-4348-806a-f58bf245ab3f/prompt/0ad26dbe-480f-4448-a569-b7d9d269f94e",
+                        "text": "Music_Jazz_MyTimetoFly_Inst.wav",
+                        "type": "Prompt"
+                    }
+                ],
+                "timeoutUnit": {
+                    "display": "Minutes",
+                    "value": "min"
+                }
+            }
+        },
+        {
+            "id": "c2160ab4-4fff-406f-bfa4-7cec4e6c2064",
+            "type": "LoopPrompts",
+            "branches": [
+                {
+                    "condition": "Error",
+                    "transition": "f4563602-3842-4390-b522-b9889f6a5b7a"
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "Text",
+                    "value": "The agent you are trying to reach is either not available or is busy on another call. Please try again later.",
+                    "key": "text"
+                }
+            ],
+            "metadata": {
+                "position": {
+                    "x": 627,
+                    "y": 221
+                },
+                "audio": [
+                    {
+                        "tts": "The agent you are trying to reach is either not available or is busy on another call. Please try again later.",
+                        "useTts": true,
+                        "ttsType": "text",
+                        "type": "Text"
+                    }
+                ],
+                "timeoutUnit": {
+                    "display": "Seconds",
+                    "value": "sec"
+                }
+            }
+        },
+        {
+            "id": "e97d8ffe-5384-4c97-9f98-68149801682a",
+            "type": "CheckStaffing",
+            "branches": [
+                {
+                    "condition": "True",
+                    "transition": "0a183497-fcb5-49bf-8bf2-37dac8372229"
+                },
+                {
+                    "condition": "False",
+                    "transition": "c2160ab4-4fff-406f-bfa4-7cec4e6c2064"
+                },
+                {
+                    "condition": "Error",
+                    "transition": "c2160ab4-4fff-406f-bfa4-7cec4e6c2064"
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "Status",
+                    "value": "Online"
+                }
+            ],
+            "metadata": {
+                "position": {
+                    "x": 350,
+                    "y": 22
+                },
+                "useDynamic": false,
+                "queue": null
+            }
+        }
+    ],
+    "version": "1",
+    "type": "customerQueue",
+    "start": "e97d8ffe-5384-4c97-9f98-68149801682a",
+    "metadata": {
+        "entryPointPosition": {
+            "x": 20,
+            "y": 20
+        },
+        "snapToGrid": false,
+        "name": "Agent Cx Queue Flow",
+        "description": null,
+        "type": "customerQueue",
+        "status": "published",
+        "hash": "6e396d1efed0f4c5167284ef42a04252e6b30d3029155d132be596c26331aedb"
+    }
+}
