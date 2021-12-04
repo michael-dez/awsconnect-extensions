@@ -23,9 +23,11 @@ Note: Requires installation of the [sam cli](https://docs.aws.amazon.com/serverl
 2. From the root of the project directory run ```sam deploy --guided```
 3. Use the ARN of the Connect instance for `ConnectParam`, the desired table name for `TableParam`, and an existing bucket for `BucketParam` to export the csv.
 ## Configuration
-* See the [knowledge article](https://aws.amazon.com/premiumsupport/knowledge-center/connect-agent-to-agent-extensions/)  for  detailed instructions on adding the Lambda, creating the necessary contact flows, and quick connect.
-* Make sure to set the **Destination Key** attribute to `pk_value` instead of `Extension` in the 'Invoke AWS Lambda Function' block.
-* S3 export can be disabled by deleting the `AWS_BUCKET_EXPORT` environment variable in the **UpdateAgentDb** Lambda.
+1. Add the GetAgent Lambda to your Amazon Connect instance from the Contact Flows tab in the instance overview.
+2. Download both contact flows located in the `contact-flows` directory.
+3. Create a new customer queue flow and import the agent-queue contact flow. Choose a name, then save and publish.
+4. Create a new contact flow and import the inbound-contact-flow. Select the GetAgent Lambda as the Function ARN in the Invoke AWS Lambda function block. Select the new customer queue flow in the ***Set customer queue flow block*** then save and publish.
+5. associate a DID phone number to the new inbound contact flow.
 ## Contribute
 * [Pull requests](https://help.github.com/articles/using-pull-requests/) are welcome.
 
